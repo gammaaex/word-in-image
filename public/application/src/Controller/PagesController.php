@@ -18,6 +18,7 @@ namespace App\Controller;
 use App\Model\Document\Tweet;
 use Cake\Core\Configure;
 use Cake\Event\Event;
+use Cake\Filesystem\File;
 use Cake\Network\Exception\ForbiddenException;
 use Cake\Network\Exception\NotFoundException;
 use Cake\View\Exception\MissingTemplateException;
@@ -154,7 +155,28 @@ class PagesController extends AppController
 
     public function upload()
     {
+        $status = null;
+        if ($this->request->is('post')) {
+            if (isset($this->request->getData()['tweet_data'])) {
+                $data = $this->request->getData()['tweet_data'];
 
+                $filePath = $data['tmp_name'];
+                $file = new File($filePath);
+                $content = $file->read();
+                $content = str_replace("window.YTD.tweet.part0 =", '{"window.YTD.tweet.part0" :', $content);
+                $content .= "}";
+
+                $json = json_decode($content);
+                foreach ($json['window.YTD.tweet.part0'] as $tweet) {
+//                    ['extended_entities'],['entities']
+                }
+
+                $file->close();
+
+                $this->Flash->success("ツイートデータの保存に成功しました。");
+                $this->redirect('/pages/search');
+            }
+        }
     }
 
 
